@@ -1,24 +1,43 @@
-import logo from './logo.svg';
 import './App.css';
+import {useState} from 'react';
+import { authentication } from './firebase-config';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
+import Dashboard from './Dashboard';
+import SignInScreen from './SignInScreen';
 
 function App() {
+    const [signedIn,setSignedIn] = useState(false);
+
+    // firebase authentication listener
+    authentication.onAuthStateChanged((user)=>{
+      if(user){
+        setSignedIn(true);
+      }else{
+        setSignedIn(false);
+      }
+    })
+
+
+    // if user is signed in, allow user to view page/component
+    const protectedRoute = (component)=>{
+      if(signedIn === true){
+         return component
+      }
+
+      return <SignInScreen />
+    }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<SignInScreen />} />
+        <Route path="/Dashboard" element={protectedRoute(<Dashboard/>)} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
